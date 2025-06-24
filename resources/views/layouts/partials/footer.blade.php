@@ -1,13 +1,12 @@
 <!-- resources/views/layouts/partials/footer.blade.php -->
- <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                            <div>
-                                <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+<footer class="py-4 bg-light mt-auto border-top">
+    <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+        <div class="text-muted">
+            &copy; {{ date('Y') }} Mon Application. Tous droits réservés.
+        </div>
+        <div>
+            <a href="#" class="text-muted me-3">Confidentialité</a>
+            <a href="#" class="text-muted">Conditions d'utilisation</a>
+        </div>
+    </div>
+</footer>

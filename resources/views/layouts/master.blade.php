@@ -1,38 +1,108 @@
-<!-- resources/views/layouts/master.blade.php -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-         <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Dashboard - SB Admin</title>
-        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-        <link href="css/styles.css" rel="stylesheet" />
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>@yield('title', 'Dashboard')</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #layoutSidenav {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        nav.sb-sidenav {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            transition: width 0.3s ease;
+        }
+
+        #layoutSidenav_content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            transition: margin-left 0.3s ease;
+        }
+
+        main {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        /* Classe pour cacher le sidebar */
+        #layoutSidenav.collapsed nav.sb-sidenav {
+            width: 0;
+            overflow: hidden;
+        }
+
+        #layoutSidenav.collapsed #layoutSidenav_content {
+            margin-left: 0;
+        }
+    </style>
 </head>
-<body class="sb-nav-fixed">
- 
-  @include('layouts.partials.header')
-  @include('layouts.partials.sidebar')
+<body>
 
-  <div class="content-wrapper p-3">
-    @yield('content')
-    
-  </div>
+    @include('layouts.partials.header')
 
-  @include('layouts.partials.footer')
+    <div id="layoutSidenav">
+        @include('layouts.partials.sidebar')
 
-</div>
+        <div id="layoutSidenav_content">
+            <main>
+                @yield('content')
+            </main>
 
-<!-- Scripts -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="js/scripts.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script src="assets/demo/chart-area-demo.js"></script>
-        <script src="assets/demo/chart-bar-demo.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-        <script src="js/datatables-simple-demo.js"></script>
+            @include('layouts.partials.footer')
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script pour toggle le sidebar -->
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.getElementById('layoutSidenav').classList.toggle('collapsed');
+        });
+    </script>
+
 </body>
 </html>
