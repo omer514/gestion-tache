@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Habitude_utilisateur;
+use App\Models\Groupe;
 use Illuminate\Http\Request;
 
 
-
-class HabitudeUtilisateurController extends Controller
+class GroupeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+         $groupes = Groupe::all();
+           return view('groupes.index', compact('groupes'));
     }
 
     /**
@@ -22,7 +22,7 @@ class HabitudeUtilisateurController extends Controller
      */
     public function create()
     {
-        //
+         return view('groupes.create');
     }
 
     /**
@@ -30,13 +30,22 @@ class HabitudeUtilisateurController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+        'nom' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
+
+    $groupe = Groupe::create($request->all());
+
+    
+
+    return redirect()->route('groupes.index')->with('success', 'Groupe créé avec succès.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Habitude_utilisateur $habitude_utilisateur)
+    public function show(Groupe $groupe)
     {
         //
     }
@@ -44,7 +53,7 @@ class HabitudeUtilisateurController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Habitude_utilisateur $habitude_utilisateur)
+    public function edit(Groupe $groupe)
     {
         //
     }
@@ -52,7 +61,7 @@ class HabitudeUtilisateurController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Habitude_utilisateur $habitude_utilisateur)
+    public function update(Request $request, Groupe $groupe)
     {
         //
     }
@@ -60,7 +69,7 @@ class HabitudeUtilisateurController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Habitude_utilisateur $habitude_utilisateur)
+    public function destroy(Groupe $groupe)
     {
         //
     }

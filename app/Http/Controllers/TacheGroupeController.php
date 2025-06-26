@@ -2,64 +2,70 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tache_groupe;
+use App\Models\TacheGroupe;
+use App\Models\Groupe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TacheGroupeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Affiche la liste des tâches du groupe auxquelles l'utilisateur appartient
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        // Récupérer toutes les tâches dans les groupes où l'utilisateur est membre
+        $taches = TacheGroupe::whereIn('groupe_id', $user->groupes()->pluck('groupes.id'))
+            ->with(['groupe', 'user', 'rappels'])
+            ->get();
+
+        return view('tachegroupes.index', compact('taches'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Formulaire de création d'une tâche dans un groupe
     public function create()
     {
-        //
+        $user = Auth::user();
+
+        // Groupes auxquels l'utilisateur appartient
+        $groupes = $user->groupes;
+
+        return view('tachegroupes.create', compact('groupes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Stocke une nouvelle tâche partagée dans un groupe
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'titre' => 'required|string|max:255',
+            'contenu' => 'required|string',
+            'date_limite' => 'required|date|after:now',
+            'groupe_id' => 'required|exists:groupes,id',
+        ]);
+
+        $tache = TacheGroupe::create([
+            'titre' => $request->titre,
+            'contenu' => $request->contenu,
+            'date_limite' => $request->date_limite,
+            'groupe_id' => $request->groupe_id,
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('tachegroupes.index')
+            ->with('success', 'Tâche créée et partagée dans le groupe avec succès.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tache_groupe $tache_groupe)
+    // Affiche une tâche spécifique
+    public function show(TacheGroupe $tachegroupe)
     {
-        //
+        return view('tachegroupes.show', compact('tachegroupe'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Tache_groupe $tache_groupe)
-    {
-        //
-    }
+    public function partager()
+{
+    $groupes = Groupe::all(); // ou ->where('user_id', auth()->id()) si besoin
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Tache_groupe $tache_groupe)
-    {
-        //
-    }
+    return view('taches.partager', compact('groupes'));
+}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Tache_groupe $tache_groupe)
-    {
-        //
-    }
 }

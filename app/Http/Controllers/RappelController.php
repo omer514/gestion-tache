@@ -3,63 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rappel;
+use App\Models\TacheGroupe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RappelController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Formulaire pour créer un rappel personnalisé pour une tâche donnée
+    public function create($tache_id)
     {
-        //
+        $tache = TacheGroupe::findOrFail($tache_id);
+
+        return view('rappels.create', compact('tache'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Stocke un rappel personnalisé pour une tâche et un utilisateur donné
+    public function store(Request $request, $tache_id)
     {
-        //
-    }
+        $request->validate([
+            'rappel_at' => 'required|date|after:now',
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $rappel = Rappel::create([
+            'tache_groupe_id' => $tache_id,
+            'user_id' => Auth::id(),
+            'rappel_at' => $request->rappel_at,
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rappel $rappel)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rappel $rappel)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Rappel $rappel)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rappel $rappel)
-    {
-        //
+        return redirect()->route('tachegroupes.show', $tache_id)
+            ->with('success', 'Rappel personnalisé créé avec succès.');
     }
 }

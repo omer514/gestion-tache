@@ -39,4 +39,17 @@ class User extends Authenticatable
     public function commentaires() {
         return $this->hasMany(Commentaire::class);
     }
+
+    public function groupes()
+    {
+        return $this->belongsToMany(Groupe::class);
+    }
+
+  public function rappels()
+    {
+        return $this->hasMany(Rappel::class);
+    }
+
+   
+    
 }

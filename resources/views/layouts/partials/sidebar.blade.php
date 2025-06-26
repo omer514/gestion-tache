@@ -23,6 +23,20 @@
                 </nav>
             </div>
 
+            <!-- Menu déroulant Tâches -->
+            <a class="nav-link collapsed d-flex justify-content-between align-items-center px-3" href="#" data-bs-toggle="collapse" data-bs-target="#collapseTaches" aria-expanded="false" aria-controls="collapseTaches" style="color: white;">
+                <div><i class="fas fa-tasks me-2"></i>Tâches Groupes</div>
+                <i class="fas fa-angle-down"></i>
+            </a>
+            <div class="collapse" id="collapseTaches" data-bs-parent="#sidenavAccordion">
+                <nav class="sb-sidenav-menu-nested nav flex-column px-4">
+                    <a class="nav-link text-white" href="{{ route('tachegroupes.index') }}">Liste des tâches Partagés</a>
+                    <a class="nav-link text-white" href="{{ route('tachegroupes.create')}}">Partager une tâche</a>
+                    <li><a href="{{ route('groupes.index') }}">👥 Groupes</a></li>
+
+                </nav>
+            </div>
+
             <!-- Autre section -->
             <div class="sb-sidenav-menu-heading px-3 mt-3 mb-2 text-uppercase small">Autres modules</div>
 
