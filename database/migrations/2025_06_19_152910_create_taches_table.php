@@ -11,18 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('taches', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->string('titre');
-    $table->text('description')->nullable();
-    $table->enum('priorite', ['faible', 'moyenne', 'haute'])->default('moyenne');
-    $table->enum('statut', ['en_attente', 'en_cours', 'terminee'])->default('en_attente');
-    $table->boolean('est_urgente')->default(false);
-    $table->dateTime('echeance')->nullable();
-    $table->timestamps();
-});
-
+        Schema::create('taches', function (Blueprint $table) {
+            $table->id();
+            
+            // Clé étrangère vers users
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            // => user_id INT unsigned NOT NULL, clé étrangère vers users.id, suppression en cascade
+            
+            $table->string('titre');
+            $table->text('description')->nullable();
+            $table->enum('priorite', ['faible', 'moyenne', 'haute'])->default('faible');
+            $table->enum('statut', ['en_attente', 'en_cours', 'terminee'])->default('en_attente');
+            $table->dateTime('echeance')->nullable();
+            $table->boolean('est_urgente')->default(false);
+            
+            $table->timestamps();
+        });
     }
 
     /**

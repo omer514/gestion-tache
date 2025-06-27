@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mt-4">
     <h4 class="mb-4">Modifier mon profil</h4>
-
+                                                                                                                                                                                    
     @if (session('status') === 'profile-updated')
         <div class="alert alert-success">
             Profil mis à jour avec succès.

@@ -18,8 +18,8 @@
             </a>
             <div class="collapse" id="collapseTaches" data-bs-parent="#sidenavAccordion">
                 <nav class="sb-sidenav-menu-nested nav flex-column px-4">
-                    <a class="nav-link text-white" href="#">Liste des tâches</a>
-                    <a class="nav-link text-white" href="#">Ajouter une tâche</a>
+                    <a class="nav-link text-white" href="{{ route('taches.index') }}">Liste des tâches</a>
+                    <a class="nav-link text-white" href="{{ route('taches.create') }}">Ajouter une tâche</a>
                 </nav>
             </div>
 
