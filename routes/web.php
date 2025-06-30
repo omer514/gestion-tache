@@ -14,6 +14,8 @@ Route::get('/dashboard', function () {
     return view('pages.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -35,6 +37,8 @@ Route::put('/taches/{tache}', [TacheController::class, 'update'])->name('taches.
 
 // Suppression d'une tâche
 Route::delete('/taches/{tache}', [TacheController::class, 'destroy'])->name('taches.destroy');
+// marquer les tâches terminer 
+Route::patch('/taches/{tache}/terminer', [TacheController::class, 'marquerTerminee'])->name('taches.terminer');
 
 
 
