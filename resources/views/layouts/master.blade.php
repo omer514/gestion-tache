@@ -9,6 +9,9 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
+    <script src="https://cdn.jsdelivr.net/npm/laravel-web-push@1.0.10"></script>
+
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
@@ -103,6 +106,28 @@
             document.getElementById('layoutSidenav').classList.toggle('collapsed');
         });
     </script>
+
+    <script>
+    window.addEventListener('load', async () => {
+        const registerPush = async () => {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            const vapidPublicKey = "{{ config('webpush.vapid.public_key') }}";
+
+            if (Notification.permission === 'default') {
+                await Notification.requestPermission();
+            }
+
+            if (Notification.permission === 'granted') {
+                await window.laravelWebPush.subscribe(registration, vapidPublicKey);
+            }
+        };
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            registerPush();
+        }
+    });
+</script>
+
 
 </body>
 </html>

@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable
 {
+    use HasPushSubscriptions;
 
     protected $fillable = [
         'name', 'email', 'password', 'score', 'niveau'
@@ -39,4 +41,7 @@ class User extends Authenticatable
     public function commentaires() {
         return $this->hasMany(Commentaire::class);
     }
+
+    
+
 }
