@@ -23,10 +23,11 @@ class User extends Authenticatable
     public function habitudes() {
         return $this->hasMany(HabitudeUtilisateur::class);
     }
-
-    public function badges() {
-        return $this->belongsToMany(Badge::class, 'user_badges');
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class)->withTimestamps()->withPivot('attribue_le');
     }
+
 
     public function historiqueProductivite() {
         return $this->hasMany(HistoriqueProductivite::class);

@@ -4,7 +4,17 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between mb-3 align-items-center">
         <h2 class="text-primary">Liste des tâches</h2>
-        <a href="{{ route('taches.create') }}" class="btn btn-success">Ajouter une tâche</a>
+        
+        <div>
+            <a href="{{ route('taches.create') }}" class="btn btn-success me-2">Ajouter une tâche</a>
+
+            {{-- Bouton pour mettre à jour les tâches échues --}}
+            <form action="{{ route('taches.majStatut') }}" method="POST" class="d-inline" onsubmit="return confirm('Confirmer la mise à jour des tâches échues ?')">
+    @csrf
+    <button type="submit" class="btn btn-warning">Mettre à jour les tâches échues</button>
+</form>
+
+        </div>
     </div>
 
     {{-- Message de succès --}}
@@ -52,11 +62,27 @@
         </thead>
         <tbody>
         @forelse($taches as $tache)
-            <tr @if($tache->est_urgente) style="background-color: #ffe5e5;" @endif>
+            @php
+                $estEnRetard = $tache->echeance && $tache->statut !== 'terminee' && \Carbon\Carbon::parse($tache->echeance)->isPast();
+            @endphp
+            <tr 
+                @if($estEnRetard)
+                    style="background-color: #f8d7da;" {{-- rouge clair pour tâches en retard --}}
+                @elseif($tache->est_urgente)
+                    style="background-color: #ffe5e5;" {{-- rose clair pour tâches urgentes --}}
+                @endif
+            >
                 <td>{{ $tache->titre }}</td>
                 <td>{{ ucfirst($tache->priorite) }}</td>
-                <td>{{ ucfirst(str_replace('_', ' ', $tache->statut)) }}</td>
-                <td>{{ $tache->echeance }}</td>
+                <td>
+                    {{ ucfirst(str_replace('_', ' ', $tache->statut)) }}
+                    @if($estEnRetard)
+                        <span class="badge bg-danger ms-1">En retard</span>
+                    @endif
+                </td>
+                <td>
+                    {{ $tache->echeance ? \Carbon\Carbon::parse($tache->echeance)->format('d/m/Y H:i') : '-' }}
+                </td>
                 <td>
                     @if($tache->est_urgente)
                         <span class="badge bg-danger">Oui</span>
@@ -70,15 +96,17 @@
                         <a href="{{ route('taches.edit', $tache) }}" class="btn btn-sm btn-warning">Modifier</a>
 
                         {{-- Supprimer --}}
-                        <form action="{{ route('taches.destroy', $tache) }}" method="POST" style="display:inline;">
-                            @csrf @method('DELETE')
+                        <form action="{{ route('taches.destroy', $tache) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
                             <button onclick="return confirm('Supprimer cette tâche ?')" class="btn btn-sm btn-danger">Supprimer</button>
                         </form>
 
-                        {{-- Terminer (seulement si pas encore terminée) --}}
+                        {{-- Terminer (si pas encore terminée) --}}
                         @if($tache->statut !== 'terminee')
-                        <form action="{{ route('taches.terminer', $tache) }}" method="POST" style="display:inline;">
-                            @csrf @method('PATCH')
+                        <form action="{{ route('taches.terminer', $tache) }}" method="POST">
+                            @csrf
+                            @method('POST')
                             <button class="btn btn-sm btn-success">Terminer</button>
                         </form>
                         @endif

@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tache;
+use App\Models\ScoreEvolution;
+use App\Models\Badge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TacheController extends Controller
 {
     public function index(Request $request)
     {
+        $maintenant = Carbon::now();
+
         $query = Tache::where('user_id', Auth::id());
 
         // Filtres facultatifs
@@ -25,10 +30,16 @@ class TacheController extends Controller
             $query->whereDate('echeance', $request->echeance);
         }
 
-        // Trier les tâches les plus urgentes d'abord
+        // Pagination avec tri (et conservation des filtres via withQueryString)
         $taches = $query->orderByDesc('est_urgente')
                         ->orderBy('echeance')
-                        ->paginate(10);
+                        ->paginate(10)
+                        ->withQueryString();
+
+        // Attribut temporaire pour gérer les échéances dépassées
+        foreach ($taches as $tache) {
+            $tache->echeanceDepassee = $tache->echeance && Carbon::parse($tache->echeance)->isPast();
+        }
 
         return view('taches.index', compact('taches'));
     }
@@ -45,7 +56,11 @@ class TacheController extends Controller
             'description' => 'nullable|string',
             'priorite' => 'required|in:faible,moyenne,haute',
             'statut' => 'required|in:en_attente,en_cours,terminee',
-            'echeance' => 'nullable|date',
+            'echeance' => ['nullable', 'date', function($attribute, $value, $fail) {
+                if ($value && Carbon::parse($value)->isPast()) {
+                    $fail("La date et l'heure d'échéance ne peuvent pas être dans le passé.");
+                }
+            }],
         ]);
 
         $tache = new Tache();
@@ -55,7 +70,7 @@ class TacheController extends Controller
         $tache->statut = $validated['statut'];
         $tache->echeance = $validated['echeance'] ?? null;
         $tache->est_urgente = $request->has('est_urgente');
-        $tache->user_id = Auth::id(); // 👈 obligatoire ici
+        $tache->user_id = Auth::id();
         $tache->save();
 
         return redirect()->route('taches.index')->with('success', 'Tâche créée avec succès.');
@@ -81,7 +96,11 @@ class TacheController extends Controller
             'description' => 'nullable|string',
             'priorite' => 'required|in:faible,moyenne,haute',
             'statut' => 'required|in:en_attente,en_cours,terminee',
-            'echeance' => 'nullable|date',
+            'echeance' => ['nullable', 'date', function($attribute, $value, $fail) {
+                if ($value && Carbon::parse($value)->isPast()) {
+                    $fail("La date et l'heure d'échéance ne peuvent pas être dans le passé.");
+                }
+            }],
         ]);
 
         $tache->update([
@@ -107,16 +126,83 @@ class TacheController extends Controller
         return redirect()->route('taches.index')->with('success', 'Tâche supprimée avec succès.');
     }
 
-    // ✅ Marquer la tâche comme terminée
+    // ✅ Marquer la tâche comme terminée (si l'échéance n'est pas encore passée)
     public function marquerTerminee(Tache $tache)
     {
         if ($tache->user_id !== Auth::id()) {
-            abort(403, 'Action non autorisée.');
+            abort(403);
+        }
+
+        if ($tache->echeance && Carbon::parse($tache->echeance)->isPast()) {
+            return redirect()->route('taches.index')->with('error', 'Échéance dépassée. Impossible de marquer cette tâche manuellement.');
         }
 
         $tache->statut = 'terminee';
         $tache->save();
 
-        return redirect()->route('taches.index')->with('success', 'Tâche marquée comme terminée.');
+        $user = Auth::user();
+        $points = 10;
+
+        ScoreEvolution::create([
+            'user_id' => $user->id,
+            'score' => $points,
+            'action' => 'Tâche terminée : ' . $tache->titre,
+        ]);
+
+        $user->total_score += $points;
+        $this->verifierEtAttribuerBadges($user);
+
+        if ($user->total_score >= 1000) {
+            $user->niveau = 'Expert';
+        } elseif ($user->total_score >= 500) {
+            $user->niveau = 'Avancé';
+        } elseif ($user->total_score >= 100) {
+            $user->niveau = 'Intermédiaire';
+        } else {
+            $user->niveau = 'Débutant';
+        }
+
+        $user->save();
+
+        return redirect()->route('taches.index')->with('success', 'Tâche terminée. Score +10');
     }
+
+    protected function verifierEtAttribuerBadges($user)
+    {
+        $badges = [
+            'Débutant' => 100,
+            'Pro' => 500,
+            'Expert' => 1000,
+        ];
+
+        foreach ($badges as $nom => $scoreMin) {
+            if ($user->total_score >= $scoreMin) {
+                $badge = Badge::firstOrCreate(['nom' => $nom], [
+                    'description' => "Badge pour un score >= $scoreMin",
+                    'icone' => 'fa-star'
+                ]);
+                if (!$user->badges->contains($badge->id)) {
+                    $user->badges()->attach($badge->id, ['attribue_le' => now()]);
+                }
+            }
+        }
+    }
+
+    // ✅ Mettre à jour automatiquement les tâches échues (sans points)
+   public function majStatut()
+{
+    // Récupère les tâches non terminées de l'utilisateur avec une échéance dépassée (date + heure)
+    $taches = Tache::where('user_id', Auth::id())
+        ->whereIn('statut', ['en_attente', 'en_cours'])
+        ->whereNotNull('echeance')
+        ->where('echeance', '<', Carbon::now()) // tient compte de la date ET de l'heure
+        ->get();
+
+    foreach ($taches as $tache) {
+        $tache->statut = 'en_retard'; // ou autre statut selon ta logique
+        $tache->save();
+    }
+
+    return redirect()->route('taches.index')->with('success', 'Tâches échues mises à jour avec succès.');
+}
 }

@@ -22,6 +22,17 @@
                     <a class="nav-link text-white" href="{{ route('taches.create') }}">Ajouter une tâche</a>
                 </nav>
             </div>
+            
+            <a class="nav-link collapsed d-flex justify-content-between align-items-center px-3" href="#" data-bs-toggle="collapse" data-bs-target="#collapseTaches" aria-expanded="false" aria-controls="collapseTaches" style="color: white;">
+                <div><i class="fas fa-tasks me-2"></i>Productivité</div>
+                <i class="fas fa-angle-down"></i>
+            </a>
+            <div class="collapse" id="collapseTaches" data-bs-parent="#sidenavAccordion">
+                <nav class="sb-sidenav-menu-nested nav flex-column px-4">
+                    <a class="nav-link text-white" href="{{ route('productivite.historique') }}">Historique</a>
+                    <a class="nav-link text-white" href="{{ route('productivite.dashboard') }}">Evolution</a>
+                </nav>
+            </div>
 
             <!-- Autre section -->
             <div class="sb-sidenav-menu-heading px-3 mt-3 mb-2 text-uppercase small">Autres modules</div>
