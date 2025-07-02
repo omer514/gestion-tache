@@ -1,0 +1,31 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            Modifier l'historique
+        </h2>
+    </x-slot>
+
+    <div class="py-6 px-4 sm:px-6 lg:px-8">
+        <form action="{{ route('historique-productivites.update', $historiqueProductivite) }}" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="block">Date</label>
+                <input type="date" name="date" value="{{ $historiqueProductivite->date }}" class="w-full px-3 py-2 border rounded" required>
+            </div>
+
+            <div>
+                <label class="block">Tâches terminées</label>
+                <input type="number" name="taches_terminees" value="{{ $historiqueProductivite->taches_terminees }}" class="w-full px-3 py-2 border rounded" required>
+            </div>
+
+            <div>
+                <label class="block">Score du jour</label>
+                <input type="number" name="score_du_jour" value="{{ $historiqueProductivite->score_du_jour }}" class="w-full px-3 py-2 border rounded" required>
+            </div>
+
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Mettre à jour</button>
+        </form>
+    </div>
+</x-app-layout>
