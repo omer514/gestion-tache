@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TacheController;
 use App\http\Controllers\ProductiviteController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HistoriqueProductiviteController;
+
 
 Route::get('/', function () {
     return view('auth.login');
@@ -20,6 +22,7 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 // Liste des tâches
 Route::get('/taches', [TacheController::class, 'index'])->name('taches.index');
@@ -54,6 +57,14 @@ Route::post('/taches/{tache}/terminer', [TacheController::class, 'marquerTermine
 Route::post('/taches/maj-statut', [TacheController::class, 'majStatut'])->name('taches.majStatut');
 
 
+
+
+
+    //Route historiques_productivites(avec touts les mehodes)
+
+    Route::middleware(['auth'])->group(function () {
+    Route::resource('historique-productivites', HistoriqueProductiviteController::class);
+});
 
 
     // Formulaire de changement de mot de passe

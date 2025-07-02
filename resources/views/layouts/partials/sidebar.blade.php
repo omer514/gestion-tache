@@ -34,6 +34,19 @@
                 </nav>
             </div>
 
+              <!-- Menu déroulant histoeiques de productivites -->
+            <a class="nav-link collapsed d-flex justify-content-between align-items-center px-3" href="#" data-bs-toggle="collapse" data-bs-target="#collapseHistoriques" aria-expanded="false" aria-controls="collapseHistoriques" style="color: white;">
+                <div><i class="fas fa-tasks me-2"></i>Mon historique</div>
+                <i class="fas fa-angle-down"></i>
+            </a>
+            <div class="collapse" id="collapseHistoriques" data-bs-parent="#sidenavAccordion">
+                <nav class="sb-sidenav-menu-nested nav flex-column px-4">
+                    <a class="nav-link text-white" href="{{ route('historique-productivites.index') }}">Évolutions</a>
+                    <a class="nav-link text-white" href="{{ route('historique-productivites.index') }}">Ajouter une information</a>
+
+                </nav>
+            </div>
+
             <!-- Autre section -->
             <div class="sb-sidenav-menu-heading px-3 mt-3 mb-2 text-uppercase small">Autres modules</div>
 
