@@ -14,7 +14,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h5>Tâches en cours</h5>
-                        <h2>{{ $tachesEnCours ?? 0 }}</h2>
+                        
                     </div>
                     <i class="fas fa-spinner fa-3x"></i>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h5>Tâches terminées</h5>
-                        <h2>{{ $tachesTerminees ?? 0 }}</h2>
+                        
                     </div>
                     <i class="fas fa-check fa-3x"></i>
                 </div>
@@ -38,7 +38,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
                         <h5>Tâches urgentes</h5>
-                        <h2>{{ $tachesUrgentes ?? 0 }}</h2>
+                        
                     </div>
                     <i class="fas fa-bolt fa-3x"></i>
                 </div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Tache;
 use App\Models\ScoreEvolution;
 use App\Models\Badge;
+use App\Models\Groupe;
+use App\Models\GroupeUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -161,11 +163,28 @@ class TacheController extends Controller
         } else {
             $user->niveau = 'Débutant';
         }
-
         $user->save();
 
         return redirect()->route('taches.index')->with('success', 'Tâche terminée. Score +10');
     }
+
+
+    public function annulerTerminaison(Tache $tache)
+{
+    if ($tache->user_id !== Auth::id()) {
+        return back()->with('error', "Vous n'êtes pas autorisé à modifier cette tâche.");
+    }
+
+    if ($tache->statut === 'terminee') {
+        $tache->statut = 'en_cours'; // ou 'en_attente', selon ta logique
+        $tache->save();
+
+        return back()->with('success', 'La tâche a été remise en cours.');
+    }
+
+    return back()->with('info', 'La tâche n\'est pas terminée.');
+}
+
 
     protected function verifierEtAttribuerBadges($user)
     {
@@ -204,5 +223,72 @@ class TacheController extends Controller
     }
 
     return redirect()->route('taches.index')->with('success', 'Tâches échues mises à jour avec succès.');
+}
+
+public function show(Groupe $groupe)
+{
+    // Vérifie si l'utilisateur est membre du groupe
+    if (! $groupe->membres->contains(Auth::id()) && $groupe->createur_id !== Auth::id()) {
+        abort(403, 'Vous ne faites pas partie de ce groupe.');
+    }
+
+    // Charger les relations pour optimisation
+    $groupe->load([
+        'createur',
+        'membres',
+        'taches.assignee'
+    ]);
+
+    return view('groupes.show', compact('groupe'));
+}
+
+public function indexGroupe(Groupe $groupe)
+{
+    $taches = $groupe->taches()->with('assignee')->get();  // récupérer tâches du groupe
+    return view('taches.indexGroupe', compact('groupe', 'taches'));
+}
+
+public function createGroupe(Groupe $groupe)
+{
+    // Vérifie que l'utilisateur appartient au groupe
+    if (!$groupe->membres->contains(Auth::id())) {
+        abort(403, 'Vous ne faites pas partie de ce groupe.');
+    }
+
+    // On récupère les membres pour l'assignation
+    $membres = $groupe->membres;
+
+    return view('taches.create_groupe', compact('groupe', 'membres'));
+}
+
+public function storeGroupe(Request $request, Groupe $groupe)
+{
+    // Vérifie que l'utilisateur appartient au groupe
+    if (!$groupe->membres->contains(Auth::id())) {
+        abort(403, 'Vous ne faites pas partie de ce groupe.');
+    }
+
+    $validated = $request->validate([
+        'nom' => 'required|string|max:255',
+        'echeance' => ['required', 'date', function($attribute, $value, $fail) {
+            if (Carbon::parse($value)->isPast()) {
+                $fail("L'échéance ne peut pas être dans le passé.");
+            }
+        }],
+        'priorite' => 'required|in:basse,moyenne,haute',
+        'assignee_id' => 'nullable|exists:users,id',
+    ]);
+
+    $tache = new Tache();
+    $tache->titre = $validated['nom'];
+    $tache->echeance = $validated['echeance'];
+    $tache->priorite = $validated['priorite'];
+    $tache->statut = 'en_attente';
+    $tache->user_id = Auth::id(); // Créateur de la tâche
+    $tache->groupe_id = $groupe->id;
+    $tache->assignee_id = $request->assignee_id ?? null;
+    $tache->save();
+
+    return redirect()->route('groupes.show', $groupe)->with('success', 'Tâche de groupe créée avec succès.');
 }
 }

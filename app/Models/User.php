@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\Groupe;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -40,4 +40,30 @@ class User extends Authenticatable
     public function commentaires() {
         return $this->hasMany(Commentaire::class);
     }
+
+ public function groupes()
+{
+    return $this->belongsToMany(Groupe::class)->withPivot('accepte')->withTimestamps();
+}
+
+public function groupesCrees()
+{
+    return $this->hasMany(Groupe::class, 'createur_id');
+}
+
+
+
+// Invitations reçues
+public function invitations()
+{
+    return $this->hasMany(Invitation::class, 'utilisateur_id');
+}
+// public function groupes()
+// {
+//     return $this->belongsToMany(Groupe::class, 'groupe_user', 'user_id', 'groupe_id');
+// }
+
+
+
+
 }

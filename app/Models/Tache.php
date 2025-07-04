@@ -17,7 +17,10 @@ class Tache extends Model
         'priorite',
         'statut',
         'echeance',
-        'est_urgente'
+        'est_urgente',
+        'user_id', 
+        'groupe_id', 
+        'assignee_id'
     ];
 
     public function user()
@@ -42,7 +45,20 @@ class Tache extends Model
 
     
 
+    public function groupe()
+{
+    return $this->belongsTo(Groupe::class);
+}
 
+
+// app/Models/Tache.php
+
+
+
+public function assignee()
+{
+    return $this->belongsTo(User::class, 'assignee_id');
+}
 
 
 

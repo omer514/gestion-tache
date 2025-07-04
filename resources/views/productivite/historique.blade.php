@@ -2,11 +2,20 @@
 
 @section('content')
 <div class="container mt-4">
-    <h2>Historique de productivité</h2>
+    <!-- Titre centré -->
+    <h2 class="text-center mb-4">Historique de productivité</h2>
 
-    <p><span class="badge bg-primary">Niveau :</span> {{ Auth::user()->niveau }}</p>
-    <p><span class="badge bg-success">Score total :</span> {{ Auth::user()->total_score }}</p>
+    <!-- Ligne avec niveau à gauche et score à droite -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="mb-0">
+            <span class="badge bg-primary">Niveau :</span> {{ Auth::user()->niveau }}
+        </p>
+        <p class="mb-0">
+            <span class="badge bg-success">Score total :</span> {{ Auth::user()->total_score }}
+        </p>
+    </div>
 
+    <!-- Tableau des évolutions -->
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
@@ -26,6 +35,7 @@
         </tbody>
     </table>
 
+    <!-- Pagination -->
     <div class="d-flex justify-content-center">
         {{ $evolutions->links() }}
     </div>

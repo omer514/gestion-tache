@@ -10,10 +10,9 @@
 
             {{-- Bouton pour mettre à jour les tâches échues --}}
             <form action="{{ route('taches.majStatut') }}" method="POST" class="d-inline" onsubmit="return confirm('Confirmer la mise à jour des tâches échues ?')">
-    @csrf
-    <button type="submit" class="btn btn-warning">Mettre à jour les tâches échues</button>
-</form>
-
+                @csrf
+                <button type="submit" class="btn btn-warning">Mettre à jour les tâches échues</button>
+            </form>
         </div>
     </div>
 
@@ -102,13 +101,20 @@
                             <button onclick="return confirm('Supprimer cette tâche ?')" class="btn btn-sm btn-danger">Supprimer</button>
                         </form>
 
-                        {{-- Terminer (si pas encore terminée) --}}
+                        {{-- Si non terminée → bouton Terminer --}}
                         @if($tache->statut !== 'terminee')
-                        <form action="{{ route('taches.terminer', $tache) }}" method="POST">
-                            @csrf
-                            @method('POST')
-                            <button class="btn btn-sm btn-success">Terminer</button>
-                        </form>
+                            <form action="{{ route('taches.terminer', $tache) }}" method="POST">
+                                @csrf
+                                @method('POST')
+                                <button class="btn btn-sm btn-success">Terminer</button>
+                            </form>
+                        @else
+                            {{-- Si terminée → bouton Annuler --}}
+                            <form action="{{ route('taches.annuler', $tache) }}" method="POST">
+                                @csrf
+                                @method('POST')
+                                <button onclick="return confirm('Annuler la terminaison de cette tâche ?')" class="btn btn-sm btn-secondary">Annuler</button>
+                            </form>
                         @endif
                     @else
                         <em class="text-muted">Aucune action</em>
