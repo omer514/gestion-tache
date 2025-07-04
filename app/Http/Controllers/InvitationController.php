@@ -2,44 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Groupe;
 use App\Models\Invitation;
+use Illuminate\Support\Str;
+use App\Mail\InvitationMail;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
 {
-    // Liste des invitations de l'utilisateur connecté
-    public function index()
+    public function envoyer(Request $request, $groupeId)
     {
-        $invitations = Invitation::where('user_id', Auth::id())
-            ->where('statut', 'en_attente')
-            ->with('groupe') // pour afficher info groupe lié
-            ->get();
+        $request->validate([
+            'email' => 'required|email',
+        ]);
 
-        return view('invitations.index', compact('invitations'));
+        $groupe = Groupe::findOrFail($groupeId);
+        $email = $request->input('email');
+        $user = User::where('email', $email)->first();
+
+        $token = Str::random(40);
+
+        $invitation = Invitation::create([
+            'email' => $email,
+            'groupe_id' => $groupe->id,
+            'user_id' => $user?->id, // null si l'utilisateur n'existe pas
+            'token' => $token,
+            'statut' => 'en_attente',
+        ]);
+
+       try {
+    Mail::to($email)->send(new InvitationMail($invitation));
+    return back()->with('success', 'Invitation envoyée avec succès.');
+} 
+ catch (\Exception $e) {
+    // Affiche l'erreur à l'écran
+    
+    return back()->with('error', 'Erreur lors de l’envoi de l’email : ' . $e->getMessage());
+}
+
+        return back()->with('success', 'Invitation envoyée avec succès.');
     }
 
-    // Accepter une invitation (tu as déjà ça dans GroupeController, mais tu peux aussi la déplacer ici)
-    public function accepter(Invitation $invitation)
+    public function accepter($token)
     {
-        if ($invitation->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $invitation = Invitation::where('token', $token)
+                                ->where('statut', 'en_attente')
+                                ->firstOrFail();
 
         $invitation->update(['statut' => 'acceptee']);
-        $invitation->groupe->membres()->attach(Auth::id(), ['accepte' => true]);
 
-        return redirect()->route('invitations.index')->with('success', 'Invitation acceptée.');
-    }
+        // Lier l'utilisateur connecté au groupe
+        Auth::user()->groupes()->attach($invitation->groupe_id);
 
-    // Refuser une invitation
-    public function refuser(Invitation $invitation)
-    {
-        if ($invitation->utilisateur_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $invitation->update(['statut' => 'refusee']);
-
-        return redirect()->route('invitations.index')->with('success', 'Invitation refusée.');
+        return redirect('/dashboard')->with('success', 'Invitation acceptée.');
     }
 }
+
+

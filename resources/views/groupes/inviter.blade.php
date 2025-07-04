@@ -1,6 +1,18 @@
 @extends('layouts.master')
 
 @section('content')
+
+@if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 <div class="container mt-4">
     <h2>Inviter un utilisateur dans le groupe : {{ $groupe->nom }}</h2>
 
@@ -11,13 +23,11 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('groupes.inviter', $groupe) }}">
-        @csrf
-        <div class="mb-3">
-            <label for="email" class="form-label">Adresse email de l’utilisateur</label>
-            <input type="email" name="email" id="email" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-success">Envoyer l’invitation</button>
-    </form>
+    <form method="POST" action="{{ url('/groupes/' . $groupe->id . '/inviter') }}">
+            @csrf
+            <input type="email" name="email" required placeholder="Email de l'utilisateur à inviter">
+            <button type="submit">Envoyer l’invitation</button>
+</form>
+
 </div>
 @endsection

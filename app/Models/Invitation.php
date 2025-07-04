@@ -3,10 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Invitation extends Model
 {
-    protected $fillable = ['groupe_id', 'user_id', 'statut'];
+    use HasFactory;
+
+    protected $fillable = [
+        'email',
+        'groupe_id',
+        'user_id',
+        'token',
+        'statut',
+    ];
 
     public function groupe()
     {

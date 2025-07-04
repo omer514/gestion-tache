@@ -19,7 +19,7 @@ Route::get('/dashboard', function () {
     return view('pages.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
+Route::get('/invitations/accepter/{token}', [InvitationController::class, 'accepter']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -80,6 +80,7 @@ Route::get('/groupes/{groupe}/taches', [TacheController::class, 'show'])->name('
 
 Route::get('/groupes/{groupe}/taches', [TacheController::class, 'indexGroupe'])->name('taches.indexGroupe');
 
+Route::post('/groupes/{id}/inviter', [InvitationController::class, 'envoyer']);
 
     // Formulaire de changement de mot de passe
 Route::get('/password/change', [App\Http\Controllers\Auth\ChangePasswordController::class, 'edit'])
