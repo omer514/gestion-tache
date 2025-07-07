@@ -11,7 +11,7 @@ class ScoreEvolution extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'score', 'action', 'recorded_at'];
+    protected $fillable = ['user_id','tache_id', 'score', 'action', 'recorded_at'];
 
     protected $dates = ['recorded_at'];
 

@@ -11,6 +11,7 @@ return new class extends Migration {
         Schema::create('score_evolutions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('tache_id')->constrained()->onDelete('cascade');
             $table->integer('score');
             $table->string('action')->nullable();
             $table->timestamp('recorded_at')->useCurrent();

@@ -6,9 +6,11 @@ use App\Models\Tache;
 use App\Models\ScoreEvolution;
 use App\Models\Badge;
 use App\Models\Groupe;
+use App\Models\User;
 use App\Models\GroupeUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class TacheController extends Controller
@@ -147,8 +149,10 @@ class TacheController extends Controller
 
         ScoreEvolution::create([
             'user_id' => $user->id,
+            'tache_id' => $tache->id,
             'score' => $points,
             'action' => 'Tâche terminée : ' . $tache->titre,
+            'recorded_at' => now(),
         ]);
 
         $user->total_score += $points;
@@ -169,21 +173,82 @@ class TacheController extends Controller
     }
 
 
-    public function annulerTerminaison(Tache $tache)
+ public function annulerTerminaison(Tache $tache)
 {
+    // Vérifie que l'utilisateur est bien le propriétaire
     if ($tache->user_id !== Auth::id()) {
         return back()->with('error', "Vous n'êtes pas autorisé à modifier cette tâche.");
     }
 
+    // Si la tâche est bien terminée, on peut l'annuler
     if ($tache->statut === 'terminee') {
-        $tache->statut = 'en_cours'; // ou 'en_attente', selon ta logique
+
+        // Revenir à en cours
+        $tache->statut = 'en_cours';
         $tache->save();
 
-        return back()->with('success', 'La tâche a été remise en cours.');
+        // Récupérer l'utilisateur
+        $user = Auth::user();
+
+        // Récupérer le score associé à cette tâche
+        $score = ScoreEvolution::where('user_id', $user->id)
+            ->where('tache_id', $tache->id)
+            ->value('score'); // récupère juste la valeur
+
+        // Supprimer la ligne dans score_evolutions
+        ScoreEvolution::where('user_id', $user->id)
+            ->where('tache_id', $tache->id)
+            ->delete();
+
+        // Mettre à jour le score total de l'utilisateur
+        if ($score) {
+           $user->total_score = max(0, $user->total_score - $score); // éviter score négatif
+            $user->save();
+            Auth::setUser($user); // actualiser l'utilisateur en session
+
+            // Recalculer niveau ou badges si tu as une méthode
+            if (method_exists($this, 'mettreAJourNiveau')) {
+                $this->mettreAJourNiveau($user);
+            }
+        }
+
+        return back()->with('success', 'La tâche a été remise en cours et la productivité ajustée.');
     }
 
-    return back()->with('info', 'La tâche n\'est pas terminée.');
+    return back()->with('info', 'La tâche n\'était pas terminée.');
 }
+protected function mettreAJourNiveau($user)
+{
+    $score = $user->score;
+    $niveau = 'Débutant';
+
+    if ($score >= 200) {
+        $niveau = 'Expert';
+    } elseif ($score >= 100) {
+        $niveau = 'Intermédiaire';
+    }
+
+    $user->niveau = $niveau;
+    $user->save();
+}
+
+protected function mettreAJourBadges(User $user)
+{
+    $score = $user->score;
+
+    // Supprimer tous les badges actuels
+    $user->badges()->detach();
+
+    // Réattribution des badges selon le score (à adapter à ta logique)
+    if ($score >= 300) {
+        $user->badges()->attach([1, 2, 3]); // Or, Argent, Bronze
+    } elseif ($score >= 200) {
+        $user->badges()->attach([2, 3]); // Argent, Bronze
+    } elseif ($score >= 100) {
+        $user->badges()->attach([3]); // Bronze
+    }
+}
+
 
 
     protected function verifierEtAttribuerBadges($user)
