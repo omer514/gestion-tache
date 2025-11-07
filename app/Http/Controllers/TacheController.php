@@ -244,7 +244,7 @@ protected function mettreAJourBadges(User $user)
         $user->badges()->attach([1, 2, 3]); // Or, Argent, Bronze
     } elseif ($score >= 200) {
         $user->badges()->attach([2, 3]); // Argent, Bronze
-    } elseif ($score >= 100) {
+    } elseif ($score >= 20) {
         $user->badges()->attach([3]); // Bronze
     }
 }
